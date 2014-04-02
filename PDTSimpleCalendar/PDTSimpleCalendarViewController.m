@@ -36,7 +36,9 @@ static NSString *PDTSimpleCalendarViewHeaderIdentifier = @"com.producteev.collec
 @end
 
 
-@implementation PDTSimpleCalendarViewController
+@implementation PDTSimpleCalendarViewController {
+	PDTSimpleCalendarViewFlowLayout	*_collectionViewLayoutOverride;
+}
 
 //Explicitely @synthesize the var (it will create the iVar for us automatically as we redefine both getter and setter)
 @synthesize firstDate = _firstDate;
@@ -59,10 +61,15 @@ static NSString *PDTSimpleCalendarViewHeaderIdentifier = @"com.producteev.collec
 
 - (instancetype)initWithCoder:(NSCoder *)coder
 {
-    //Force the creation of the view with the pre-defined Flow Layout.
-    //Still possible to define a custom Flow Layout, if needed by using initWithCollectionViewLayout:
-    self = [super initWithCollectionViewLayout:[[PDTSimpleCalendarViewFlowLayout alloc] init]];
+	self = [super initWithCoder:coder];
+
     if (self) {
+		//Force the creation of the view with the pre-defined Flow Layout.
+		//Still possible to define a custom Flow Layout, if needed by using initWithCollectionViewLayout:
+		if (![[super collectionViewLayout] isKindOfClass:PDTSimpleCalendarViewFlowLayout.class]) {
+			_collectionViewLayoutOverride = [[PDTSimpleCalendarViewFlowLayout alloc] init];
+		}
+		
         // Custom initialization
         [self simpleCalendarCommonInit];
     }
@@ -86,6 +93,15 @@ static NSString *PDTSimpleCalendarViewHeaderIdentifier = @"com.producteev.collec
     self.backgroundColor = [UIColor whiteColor];
     self.overlayTextColor = [UIColor blackColor];
     self.daysPerWeek = 7;
+}
+
+/**
+ Internally override the layout in use for convenience of those using Storyboards
+ */
+- (UICollectionViewLayout *)collectionViewLayout {
+	return (_collectionViewLayoutOverride ?
+			_collectionViewLayoutOverride :
+			[super collectionViewLayout]);
 }
 
 #pragma mark - Accessors
